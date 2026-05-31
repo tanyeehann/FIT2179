@@ -1,0 +1,117 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Average Rainfall Distribution Across Malaysian Regions",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": "Highlighting the wettest states and territories based on historical climate records",
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 580,
+  "height": 300,
+  "projection": {
+    "type": "mercator"
+  },
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    }
+  },
+  "layer": [
+    {
+      "data": {
+        "url": "malaysia-states.topojson",
+        "format": {
+          "type": "topojson",
+          "feature": "states"
+        }
+      },
+      "mark": {
+        "type": "geoshape",
+        "fill": "#e6e6e6",
+        "stroke": "#ffffff",
+        "strokeWidth": 1
+      },
+      "encoding": {
+        "tooltip": [
+          {"field": "properties.Name", "type": "nominal", "title": "Region (No Data)"}
+        ]
+      }
+    },
+    {
+      "data": {
+        "url": "rainfall_state_clean.csv"
+      },
+      "transform": [
+        {
+          "aggregate": [
+            {"op": "mean", "field": "rfh_avg", "as": "mean_rainfall"}
+          ],
+          "groupby": ["state"]
+        },
+        {
+          "lookup": "state",
+          "from": {
+            "data": {
+              "url": "malaysia-states.topojson",
+              "format": {
+                "type": "topojson",
+                "feature": "states"
+              }
+            },
+            "key": "properties.Name",
+            "fields": ["type", "geometry"]
+          }
+        }
+      ],
+      "params": [
+        {
+          "name": "hover",
+          "select": {
+            "type": "point",
+            "on": "mouseover",
+            "clear": "mouseout"
+          }
+        }
+      ],
+      "mark": {
+        "type": "geoshape",
+        "stroke": "#ffffff",
+        "strokeWidth": 1
+      },
+      "encoding": {
+        "shape": {
+          "field": "geometry",
+          "type": "geojson"
+        },
+        "color": {
+          "field": "mean_rainfall",
+          "type": "quantitative",
+          "title": "Average Rainfall (millimeters)",
+          "scale": {"scheme": "blues"},
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "gradientLength": 600,
+            "titleAnchor": "middle"
+          }
+        },
+        "opacity": {
+          "condition": {
+            "param": "hover",
+            "empty": false,
+            "value": 1
+          },
+          "value": 0.8
+        },
+        "tooltip": [
+          {"field": "state", "type": "nominal", "title": "State / Territory"},
+          {"field": "mean_rainfall", "type": "quantitative", "title": "Average Rainfall (millimeters)", "format": ".2f"}
+        ]
+      }
+    }
+  ]
+}

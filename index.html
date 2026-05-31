@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT2179 Assignment 2 - Data Visualisation</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.6.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff; 
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden; 
+            color: #000000;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto 50px auto;
+            text-align: left;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            color: #000000;
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .intro-text {
+            color: #000000;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 900px;
+            text-align: justify;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px; 
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            box-sizing: border-box;
+        }
+
+        .grid-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px; 
+            align-items: start;
+        }
+
+        .grid-row-1 {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .idiom-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            width: 100%;
+        }
+
+        .left-card {
+            justify-self: end; 
+        }
+        .right-card {
+            justify-self: start;
+        }
+        
+        .idiom-card-horizontal {
+            display: flex;
+            flex-direction: row;
+            align-items: center; 
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+        }
+        
+        .text-below {
+            margin-top: 20px;
+            margin-bottom: 40px; 
+            font-size: 15px; 
+            color: #000000;
+            line-height: 1.6;
+            text-align: left; 
+            border: 1px solid #000000; 
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 4px;
+            max-width: 500px; 
+            box-sizing: border-box;
+        }
+        
+        .text-beside {
+            font-size: 15px;
+            color: #000000;
+            line-height: 1.6;
+            max-width: 300px;
+            text-align: left; 
+            border: 1px solid #000000; 
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .vega-embed {
+            padding: 10px; 
+            border: none;
+            outline: none;
+            max-width: 100%;
+            overflow: visible; 
+        }
+
+        .vega-embed .vega-bindings {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .metadata-section {
+            max-width: 1400px;
+            margin: 60px auto 50px auto;
+            padding: 25px;
+            background-color: #fafafa;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 15px;
+            color: #000000;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+        
+        .metadata-section strong {
+            color: #000000;
+        }
+        .metadata-section a {
+            color: #1565c0;
+            text-decoration: none;
+        }
+        .metadata-section a:hover {
+            text-decoration: underline;
+        }
+        .metadata-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .metadata-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>The Impact of Rainfall on Agriculture and Local Inflation</h1>
+        <p class="intro-text">
+            This visualization explores the chain reaction between climate, agriculture, and economics across Malaysian states and territories. By examining historical rainfall patterns and monsoon seasons, we can identify how weather intensity impacts the production volumes of essential food and industrial crops. In turn, these agricultural shifts directly influence local living costs, allowing us to track consumer price index volatility and understand how environmental factors ultimately drive regional inflation over time.
+        </p>
+    </div>
+    
+    <div class="dashboard-container">
+        
+        <div class="grid-row-2">
+            <div class="idiom-card left-card">
+                <div id="map_container"></div>
+                <div class="text-below">
+                    Sarawak, Kelantan, and Negeri Sembilan record<br>
+                    the heaviest annual rainfall in Malaysia. This<br>
+                    consistent high precipitation shapes local<br>
+                    land conditions and directly dictates<br>
+                    agricultural potential.
+                </div>
+            </div>
+            <div class="idiom-card right-card">
+                <div id="heatmap_container"></div>
+                <div class="text-below">
+                    The standard January to December sequence<br>
+                    shows the Northeast Monsoon bringing<br>
+                    intense rain to regions like Labuan and<br>
+                    Kelantan during November and December.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row-2">
+            <div class="idiom-card left-card">
+                <div id="area_container"></div>
+                <div class="text-below">
+                    National crop production remains stable.<br>
+                    Paddy, fruits, and vegetables form the<br>
+                    largest volumes, ensuring steady food<br>
+                    supplies despite minor yearly fluctuations.
+                </div>
+            </div>
+            <div class="idiom-card right-card">
+                <div id="facet_container"></div>
+                <div class="text-below">
+                    Viewing individual state trajectories reveals<br>
+                    unique growth patterns. Some regions show<br>
+                    steady production increases, reflecting<br>
+                    strong agricultural focus and development.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row-1">
+            <div class="idiom-card-horizontal">
+                <div id="scatter_container"></div>
+                <div class="text-beside">
+                    States dedicating more land to farming<br>
+                    generally produce higher volumes.<br>
+                    However, yield efficiency varies greatly<br>
+                    depending on the chosen crop and<br> 
+                    farming practices.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row-2">
+            <div class="idiom-card left-card">
+                <div id="stacked_container"></div>
+                <div class="text-below">
+                    Higher rainfall does not guarantee better<br>
+                    harvests. Specific crops thrive only under<br>
+                    ideal weather, showing clear mismatches<br>
+                    between heavy rain and total yield.
+                </div>
+            </div>
+            <div class="idiom-card right-card">
+                <div id="normbar_container"></div>
+                <div class="text-below">
+                    Certain states rely heavily on a single crop.<br>
+                    Kedah, Penang, and Perlis focus almost<br>
+                    entirely on paddy, while others maintain<br>
+                    diverse agricultural output.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row-2">
+            <div class="idiom-card left-card">
+                <div id="errorband_container"></div>
+                <div class="text-below">
+                    The inflation gap widens during periods<br>
+                    of economic stress. This indicates that<br>
+                    prices for daily goods move unevenly,<br>
+                    creating unpredictable living costs.
+                </div>
+            </div>
+            <div class="idiom-card right-card">
+                <div id="dumbbell_container"></div>
+                <div class="text-below">
+                    Every state experienced rising living costs<br>
+                    between the selected years. Selangor shows<br>
+                    the largest index jump, placing heavier<br>
+                    financial pressure on its residents.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row-1">
+            <div class="idiom-card-horizontal">
+                <div id="dashboard_container"></div>
+                <div class="text-beside">
+                    Top producing states anchor the<br>
+                    national food supply. Observing<br>
+                    their local inflation reveals how<br>
+                    regional agricultural output interacts<br>
+                    with rising consumer prices.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="metadata-section">
+        <strong>Author:</strong> Tan Yee Hann (Student ID: 35839708)<br>
+        <strong>Date:</strong> 31 May 2026<br>
+        <strong>Unit:</strong> FIT2179 Data Visualisation, Monash University Malaysia<br><br>
+        
+        <strong>Data Sources & Asset Links:</strong>
+        <ul class="metadata-list">
+            <li><strong>Headline Inflation CPI:</strong> <a href="https://data.gov.my/data-catalogue/cpi_headline_inflation" target="_blank">data.gov.my/data-catalogue/cpi_headline_inflation</a></li>
+            <li><strong>State Level CPI:</strong> <a href="https://data.gov.my/data-catalogue/cpi_state" target="_blank">data.gov.my/data-catalogue/cpi_state</a></li>
+            <li><strong>Crop Production by State:</strong> <a href="https://data.gov.my/data-catalogue/crops_state" target="_blank">data.gov.my/data-catalogue/crops_state</a></li>
+            <li><strong>Subnational Rainfall Data:</strong> <a href="https://data.humdata.org/dataset/mys-rainfall-subnational" target="_blank">data.humdata.org/dataset/mys-rainfall-subnational</a></li>
+            <li><strong>Malaysia TopoJSON Map:</strong> <a href="https://github.com/jnewbery/CartogramMalaysia/blob/master/public/data/malaysia-states.topojson" target="_blank">github.com/jnewbery/CartogramMalaysia</a></li>
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+        var spec1 = "idiom1_map.vg.json";
+        vegaEmbed('#map_container', spec1, {actions: false}).catch(console.error);
+
+        var spec2 = "idiom2_heatmap.vg.json";
+        vegaEmbed('#heatmap_container', spec2, {actions: false}).catch(console.error);
+
+        var spec3 = "idiom3_area.vg.json";
+        vegaEmbed('#area_container', spec3, {actions: false}).catch(console.error);
+
+        var spec4 = "idiom4_facet.vg.json";
+        vegaEmbed('#facet_container', spec4, {actions: false}).catch(console.error);
+
+        var spec5 = "idiom5_vconcat.vg.json";
+        vegaEmbed('#stacked_container', spec5, {actions: false}).catch(console.error);
+
+        var spec6 = "idiom6_scatter.vg.json";
+        vegaEmbed('#scatter_container', spec6, {actions: false}).catch(console.error);
+
+        var spec7 = "idiom7_bar.vg.json";
+        vegaEmbed('#normbar_container', spec7, {actions: false}).catch(console.error);
+
+        var spec8 = "idiom8_errorband.vg.json";
+        vegaEmbed('#errorband_container', spec8, {actions: false}).catch(console.error);
+
+        var spec9 = "idiom9_dumbbell.vg.json";
+        vegaEmbed('#dumbbell_container', spec9, {actions: false}).catch(console.error);
+
+        var spec10 = "idiom10_dashboard.vg.json";
+        vegaEmbed('#dashboard_container', spec10, {actions: false}).catch(console.error);
+    </script>
+
+</body>
+</html>

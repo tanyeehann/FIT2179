@@ -1,0 +1,104 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Isolated Agricultural Growth Trajectories by Region",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": "Analyzing specific crop production trends for individual Malaysian region",
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 550,
+  "height": 280,
+  "data": {
+    "url": "crops_state.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date:'%d/%m/%Y'"
+      }
+    }
+  },
+  "params": [
+    {
+      "name": "Region_Selection",
+      "value": "Johor",
+      "bind": {
+        "input": "select",
+        "options": [
+          "Johor", "Kedah", "Kelantan", "Kuala Lumpur", "Labuan", "Melaka", 
+          "Negeri Sembilan", "Pahang", "Penang", "Perak", "Perlis", 
+          "Sabah", "Sarawak", "Selangor", "Terengganu"
+        ],
+        "name": "Select Region: "
+      }
+    }
+  ],
+  "transform": [
+    {
+      "filter": "datum.state == Region_Selection"
+    },
+    {
+      "filter": "datum.crop_type != 'flower'"
+    },
+    {
+      "calculate": "datum.production / 1000",
+      "as": "Production_Thousands"
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "labelColor": "#000000",
+      "titleColor": "#000000",
+      "grid": false,
+      "domain": false
+    }
+  },
+  "mark": {
+    "type": "area",
+    "line": {
+      "color": "#2e7d32",
+      "strokeWidth": 3
+    },
+    "color": "#81c784",
+    "opacity": 0.4,
+    "point": {
+      "filled": true,
+      "fill": "#ffffff",
+      "stroke": "#2e7d32",
+      "strokeWidth": 2
+    }
+  },
+  "encoding": {
+    "x": {
+      "field": "date",
+      "timeUnit": "year",
+      "type": "temporal",
+      "title": "Year",
+      "axis": {
+        "grid": true,
+        "gridDash": [4, 4],
+        "gridColor": "#e6e6e6"
+      }
+    },
+    "y": {
+      "field": "Production_Thousands",
+      "aggregate": "sum",
+      "type": "quantitative",
+      "title": "Total Production (Thousands of Metric Tons)",
+      "axis": {
+        "format": ",.0f"
+      }
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State / Territory"},
+      {"field": "date", "timeUnit": "year", "type": "temporal", "title": "Year"},
+      {"field": "Production_Thousands", "aggregate": "sum", "type": "quantitative", "title": "Total Production (Thousands of Metric Tons)", "format": ",.0f"}
+    ]
+  }
+}

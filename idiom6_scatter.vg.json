@@ -1,0 +1,145 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Agricultural Efficiency and Yield Correlation by Region",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": [
+      "Evaluating agricultural efficiency by comparing land usage against total yield",
+      "(scroll/pinch to zoom and click-drag to pan the view)"
+    ],
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 800,
+  "height": 450,
+  "data": {
+    "url": "crops_state.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date:'%d/%m/%Y'"
+      }
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.state != 'Malaysia'"
+    },
+    {
+      "filter": "datum.crop_type != 'flower'"
+    },
+    {
+      "calculate": "replace(datum.crop_type, '_', ' ')",
+      "as": "Spaced_Crop"
+    },
+    {
+      "calculate": "upper(slice(datum.Spaced_Crop, 0, 1)) + slice(datum.Spaced_Crop, 1)",
+      "as": "Crop_Category"
+    },
+    {
+      "calculate": "datum.planted_area / 1000",
+      "as": "Area_Thousands"
+    },
+    {
+      "calculate": "datum.production / 1000",
+      "as": "Production_Thousands"
+    }
+  ],
+  "params": [
+    {
+      "name": "State_Selection",
+      "select": {
+        "type": "point",
+        "fields": ["state"]
+      },
+      "bind": "legend"
+    },
+    {
+      "name": "Grid_Zoom",
+      "select": "interval",
+      "bind": "scales"
+    }
+  ],
+  "mark": {
+    "type": "circle",
+    "stroke": "#ffffff",
+    "strokeWidth": 0.5
+  },
+  "encoding": {
+    "x": {
+      "field": "Area_Thousands",
+      "type": "quantitative",
+      "title": "Planted Area (Thousands of Hectares)",
+      "axis": {
+        "grid": true,
+        "gridDash": [4, 4],
+        "gridColor": "#e6e6e6",
+        "format": ",.0f"
+      }
+    },
+    "y": {
+      "field": "Production_Thousands",
+      "type": "quantitative",
+      "title": "Total Production (Thousands of Metric Tons)",
+      "axis": {
+        "grid": true,
+        "gridDash": [4, 4],
+        "gridColor": "#e6e6e6",
+        "format": ",.0f"
+      }
+    },
+    "color": {
+      "field": "state",
+      "type": "nominal",
+      "title": ["State / Territory", "(Click to Filter)"],
+      "scale": {
+        "range": [
+          "#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#8c564b", 
+          "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#aec7e8", 
+          "#ffbb78", "#98df8a", "#c5b0d5", "#c49c94", "#f7b6d2", "#dbdb8d"
+        ]
+      }
+    },
+    "size": {
+      "field": "Production_Thousands",
+      "type": "quantitative",
+      "title": ["Volume", "(Thousands of Metric Tons)"],
+      "scale": {
+        "range": [40, 900]
+      },
+      "legend": {
+        "format": ",.0f",
+        "orient": "right",
+        "titleLimit": 250,
+        "titleAnchor": "start"
+      }
+    },
+    "opacity": {
+      "condition": {
+        "param": "State_Selection",
+        "value": 0.55
+      },
+      "value": 0.15
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State / Territory"},
+      {"field": "Crop_Category", "type": "nominal", "title": "Crop Category"},
+      {"field": "date", "timeUnit": "year", "type": "temporal", "title": "Year"},
+      {"field": "Area_Thousands", "type": "quantitative", "title": "Planted Area (Thousands of Hectares)", "format": ",.2f"},
+      {"field": "Production_Thousands", "type": "quantitative", "title": "Total Production (Thousands of Metric Tons)", "format": ",.2f"}
+    ]
+  },
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "domain": false,
+      "labelColor": "#000000",
+      "titleColor": "#000000"
+    }
+  }
+}

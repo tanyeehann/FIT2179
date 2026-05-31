@@ -1,0 +1,234 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Economic Intersection of Agriculture vs. Local Inflation",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": [
+      "Exploring how agricultural volumes relate to local living costs across Malaysia states",
+      "(click a row on the left to reveal its local living cost trajectory)"
+    ],
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "labelColor": "#000000",
+      "titleColor": "#000000",
+      "domain": false
+    }
+  },
+  "hconcat": [
+    {
+      "title": {
+        "text": "Total Agricultural Production",
+        "fontSize": 14,
+        "anchor": "middle"
+      },
+      "width": 300,
+      "height": 380,
+      "data": {
+        "url": "crops_state.csv",
+        "format": {
+          "type": "csv",
+          "parse": {
+            "date": "date:'%d/%m/%Y'"
+          }
+        }
+      },
+      "transform": [
+        {
+          "filter": "datum.state != 'Malaysia' && datum.state != 'Putrajaya'"
+        },
+        {
+          "filter": "datum.crop_type != 'flower'"
+        },
+        {
+          "calculate": "datum.production / 1000",
+          "as": "Production_Thousands"
+        }
+      ],
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "State_Click",
+              "select": {
+                "type": "point",
+                "fields": ["state"],
+                "clear": false,
+                "toggle": false
+              },
+              "value": [{"state": "Johor"}]
+            }
+          ],
+          "mark": {
+            "type": "bar",
+            "color": "transparent",
+            "cursor": "pointer"
+          },
+          "encoding": {
+            "y": {
+              "field": "state",
+              "type": "nominal",
+              "sort": {"op": "sum", "field": "Production_Thousands", "order": "descending"}
+            },
+            "x": {
+              "value": 300
+            },
+            "tooltip": [
+              {"field": "state", "type": "nominal", "title": "Click anywhere in this row to view local inflation"}
+            ]
+          }
+        },
+        {
+          "mark": {
+            "type": "bar",
+            "color": "#2e7d32",
+            "cornerRadiusEnd": 4,
+            "cursor": "pointer"
+          },
+          "encoding": {
+            "y": {
+              "field": "state",
+              "type": "nominal",
+              "title": "State / Territory",
+              "sort": {"op": "sum", "field": "Production_Thousands", "order": "descending"},
+              "axis": {
+                "grid": false,
+                "titleFontWeight": "bold"
+              }
+            },
+            "x": {
+              "field": "Production_Thousands",
+              "aggregate": "sum",
+              "type": "quantitative",
+              "title": "Total Volume (Thousands of Metric Tons)",
+              "axis": {
+                "grid": true,
+                "gridDash": [4, 4],
+                "gridColor": "#e6e6e6",
+                "format": ",.0f",
+                "tickCount": 5
+              }
+            },
+            "opacity": {
+              "condition": {
+                "param": "State_Click",
+                "empty": false,
+                "value": 1
+              },
+              "value": 0.25
+            },
+            "tooltip": [
+              {"field": "state", "type": "nominal", "title": "State / Territory"},
+              {"field": "Production_Thousands", "aggregate": "sum", "type": "quantitative", "title": "Total Production (Thousands of Metric Tons)", "format": ",.0f"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": {
+        "text": "Average Consumer Price Index (CPI) Trend",
+        "fontSize": 14,
+        "anchor": "middle"
+      },
+      "width": 550,
+      "height": 380,
+      "data": {
+        "url": "cpi_2d_state.csv",
+        "format": {
+          "type": "csv",
+          "parse": {
+            "date": "date:'%m/%d/%Y'"
+          }
+        }
+      },
+      "transform": [
+        {
+          "filter": "datum.state != 'Malaysia' && datum.state != 'Putrajaya'"
+        },
+        {
+          "filter": "datum.division == 'overall'"
+        },
+        {
+          "filter": {"param": "State_Click", "empty": false}
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "area",
+            "color": "#1565c0",
+            "opacity": 0.15
+          },
+          "encoding": {
+            "x": {
+              "field": "date",
+              "timeUnit": "year",
+              "type": "temporal",
+              "title": "Year",
+              "axis": {
+                "grid": false,
+                "format": "%Y",
+                "tickCount": {"interval": "year", "step": 1},
+                "labelAngle": -45
+              }
+            },
+            "y": {
+              "field": "index",
+              "aggregate": "mean",
+              "type": "quantitative",
+              "title": "Consumer Price Index (Base = 100)",
+              "scale": {
+                "zero": false
+              },
+              "axis": {
+                "grid": true,
+                "gridDash": [4, 4],
+                "gridColor": "#e6e6e6"
+              }
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "line",
+            "color": "#1565c0",
+            "strokeWidth": 3,
+            "point": {
+              "filled": true,
+              "fill": "#ffffff",
+              "stroke": "#1565c0",
+              "strokeWidth": 2,
+              "size": 60
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "date",
+              "timeUnit": "year",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "index",
+              "aggregate": "mean",
+              "type": "quantitative"
+            },
+            "tooltip": [
+              {"field": "state", "type": "nominal", "title": "Selected Region"},
+              {"field": "date", "timeUnit": "year", "type": "temporal", "title": "Year", "format": "%Y"},
+              {"field": "index", "aggregate": "mean", "type": "quantitative", "title": "Average Consumer Price Index", "format": ".1f"}
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

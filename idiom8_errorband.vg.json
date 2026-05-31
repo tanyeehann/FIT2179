@@ -1,0 +1,172 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "National Consumer Price Index Volatility",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": [
+      "The band shows the gap between highest and lowest inflation rates",
+      "(drag across the bottom timeline to zoom into a specific economic period)"
+    ],
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "data": {
+    "url": "cpi_2d_inflation.csv"
+  },
+  "transform": [
+    {
+      "filter": "datum.division != 'Total' && datum.division != 'Overall' && datum.division != '00 All Items' && datum.division != '00 ALL ITEMS'"
+    }
+  ],
+  "vconcat": [
+    {
+      "width": 550,
+      "height": 320,
+      "encoding": {
+        "x": {
+          "field": "date",
+          "timeUnit": "yearmonth",
+          "type": "temporal",
+          "title": "Year",
+          "scale": {
+            "domain": {
+              "param": "time_brush"
+            }
+          },
+          "axis": {
+            "grid": false,
+            "format": "%Y"
+          }
+        }
+      },
+      "layer": [
+        {
+          "mark": {
+            "type": "area",
+            "color": "#bbdefb",
+            "opacity": 0.5
+          },
+          "encoding": {
+            "y": {
+              "aggregate": "min",
+              "field": "inflation_yoy",
+              "type": "quantitative",
+              "title": "Year-over-Year Inflation Rate (%)",
+              "axis": {
+                "grid": true,
+                "gridDash": [4, 4],
+                "gridColor": "#e6e6e6"
+              }
+            },
+            "y2": {
+              "aggregate": "max",
+              "field": "inflation_yoy"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "line",
+            "color": "#1565c0",
+            "strokeWidth": 3
+          },
+          "encoding": {
+            "y": {
+              "aggregate": "mean",
+              "field": "inflation_yoy",
+              "type": "quantitative"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "circle",
+            "color": "#1565c0",
+            "size": 80
+          },
+          "params": [
+            {
+              "name": "hover",
+              "select": {
+                "type": "point",
+                "on": "mouseover",
+                "clear": "mouseout"
+              }
+            }
+          ],
+          "encoding": {
+            "y": {
+              "aggregate": "mean",
+              "field": "inflation_yoy",
+              "type": "quantitative"
+            },
+            "opacity": {
+              "condition": {
+                "param": "hover",
+                "empty": false,
+                "value": 1
+              },
+              "value": 0
+            },
+            "tooltip": [
+              {"field": "date", "timeUnit": "yearmonth", "type": "temporal", "title": "Month", "format": "%B %Y"},
+              {"aggregate": "max", "field": "inflation_yoy", "type": "quantitative", "title": "Maximum Division Inflation (%)", "format": ".1f"},
+              {"aggregate": "mean", "field": "inflation_yoy", "type": "quantitative", "title": "Average National Inflation (%)", "format": ".1f"},
+              {"aggregate": "min", "field": "inflation_yoy", "type": "quantitative", "title": "Minimum Division Inflation (%)", "format": ".1f"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "width": 550,
+      "height": 50,
+      "mark": {
+        "type": "area",
+        "color": "#1565c0",
+        "opacity": 0.2
+      },
+      "params": [
+        {
+          "name": "time_brush",
+          "select": {
+            "type": "interval",
+            "encodings": ["x"]
+          }
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "date",
+          "timeUnit": "yearmonth",
+          "type": "temporal",
+          "title": null,
+          "axis": {
+            "grid": false,
+            "tickCount": 10,
+            "format": "%Y"
+          }
+        },
+        "y": {
+          "aggregate": "mean",
+          "field": "inflation_yoy",
+          "type": "quantitative",
+          "axis": null
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "labelColor": "#000000",
+      "titleColor": "#000000",
+      "domain": false
+    }
+  }
+}

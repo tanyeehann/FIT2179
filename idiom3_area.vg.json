@@ -1,0 +1,115 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Annual Agricultural Production Trends by Region",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": "Tracking yield variations of crops across Malaysian region",
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 450,
+  "height": 300,
+  "data": {
+    "url": "crops_state.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date:'%d/%m/%Y'"
+      }
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.state == 'Malaysia'"
+    },
+    {
+      "filter": "datum.crop_type != 'flower'"
+    },
+    {
+      "calculate": "replace(datum.crop_type, '_', ' ')",
+      "as": "Spaced_Crop"
+    },
+    {
+      "calculate": "upper(slice(datum.Spaced_Crop, 0, 1)) + slice(datum.Spaced_Crop, 1)",
+      "as": "Crop_Category"
+    },
+    {
+      "calculate": "datum.production / 1000",
+      "as": "Production_Thousands"
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "labelColor": "#000000",
+      "titleColor": "#000000",
+      "grid": false,
+      "domain": false
+    }
+  },
+  "params": [
+    {
+      "name": "crop_selection",
+      "select": {
+        "type": "point",
+        "fields": ["Crop_Category"]
+      },
+      "bind": "legend"
+    }
+  ],
+  "mark": {
+    "type": "area",
+    "line": true,
+    "point": true
+  },
+  "encoding": {
+    "x": {
+      "field": "date",
+      "timeUnit": "year",
+      "type": "temporal",
+      "title": "Year",
+      "axis": {
+        "grid": true,
+        "gridDash": [4, 4],
+        "gridColor": "#e6e6e6"
+      }
+    },
+    "y": {
+      "field": "Production_Thousands",
+      "aggregate": "sum",
+      "type": "quantitative",
+      "title": "Total Production (Thousands of Metric Tons)",
+      "axis": {
+        "format": ",.0f"
+      }
+    },
+    "color": {
+      "field": "Crop_Category",
+      "type": "nominal",
+      "legend": {
+        "title": ["Crop Category", "(Click to Filter)"]
+      },
+      "scale": {
+        "domain": ["Paddy", "Fruits", "Vegetables", "Industrial crops", "Coconut", "Cash crops", "Spices", "Herbs"],
+        "range": ["#2e7d32", "#0277bd", "#81c784", "#fbc02d", "#8d6e63", "#4dd0e1", "#f57f17", "#512da8"]
+      }
+    },
+    "opacity": {
+      "condition": {
+        "param": "crop_selection",
+        "value": 0.85
+      },
+      "value": 0.1
+    },
+    "tooltip": [
+      {"field": "date", "timeUnit": "year", "type": "temporal", "title": "Year"},
+      {"field": "Crop_Category", "type": "nominal", "title": "Crop Category"},
+      {"field": "Production_Thousands", "aggregate": "sum", "type": "quantitative", "title": "Total Production (Thousands of Metric Tons)", "format": ",.0f"}
+    ]
+  }
+}

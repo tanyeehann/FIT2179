@@ -1,0 +1,103 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Monthly Rainfall Intensity and Monsoon Patterns by Region",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": "Average rainfall highlighting temporal weather patterns across Malaysian region",
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 500,
+  "height": 300,
+  "data": {
+    "url": "rainfall_state_clean.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date:'%d/%m/%Y'"
+      }
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.state != 'Malaysia'"
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    },
+    "axis": {
+      "labelColor": "#000000",
+      "titleColor": "#000000",
+      "grid": false,
+      "domain": false
+    }
+  },
+  "params": [
+    {
+      "name": "hover",
+      "select": {
+        "type": "point",
+        "on": "mouseover",
+        "clear": "mouseout"
+      }
+    }
+  ],
+  "mark": {
+    "type": "rect",
+    "stroke": "#ffffff",
+    "strokeWidth": 0.5
+  },
+  "encoding": {
+    "x": {
+      "field": "date",
+      "timeUnit": "month",
+      "type": "ordinal",
+      "title": "Month",
+      "axis": {
+        "labelAngle": -45,
+        "format": "%B",
+        "labelOverlap": false
+      }
+    },
+    "y": {
+      "field": "state",
+      "type": "nominal",
+      "title": "State / Territory",
+      "sort": "ascending"
+    },
+    "color": {
+      "aggregate": "mean",
+      "field": "rfh",
+      "type": "quantitative",
+      "scale": {
+        "type": "sqrt",
+        "scheme": "blues"
+      },
+      "title": "Average Rainfall (millimeters)",
+      "legend": {
+        "orient": "bottom",
+        "direction": "horizontal",
+        "gradientLength": 500,
+        "titleAnchor": "middle"
+      }
+    },
+    "opacity": {
+      "condition": {
+        "param": "hover",
+        "empty": false,
+        "value": 1
+      },
+      "value": 0.7
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State / Territory"},
+      {"field": "date", "timeUnit": "month", "type": "temporal", "title": "Month", "format": "%B"},
+      {"field": "rfh", "aggregate": "mean", "type": "quantitative", "title": "Average Rainfall (millimeters)", "format": ".2f"}
+    ]
+  }
+}

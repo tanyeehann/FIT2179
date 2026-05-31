@@ -1,0 +1,113 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Agricultural Focus and Crop Proportions by Region",
+    "color": "#000000",
+    "fontSize": 20,
+    "subtitle": "Analyzing output proportions to identify reliance on specific crops across Malaysia states",
+    "subtitleColor": "#1a1a1a",
+    "subtitleFontSize": 14,
+    "anchor": "start",
+    "offset": 25
+  },
+  "width": 500,
+  "height": 450,
+  "data": {
+    "url": "crops_state.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date:'%d/%m/%Y'"
+      }
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.state != 'Malaysia'"
+    },
+    {
+      "filter": "datum.crop_type != 'flower'"
+    },
+    {
+      "calculate": "replace(datum.crop_type, '_', ' ')",
+      "as": "Spaced_Crop"
+    },
+    {
+      "calculate": "upper(slice(datum.Spaced_Crop, 0, 1)) + slice(datum.Spaced_Crop, 1)",
+      "as": "Crop_Category"
+    },
+    {
+      "calculate": "datum.production / 1000",
+      "as": "Production_Thousands"
+    }
+  ],
+  "params": [
+    {
+      "name": "Crop_Selection",
+      "select": {
+        "type": "point",
+        "fields": ["Crop_Category"]
+      },
+      "bind": "legend"
+    }
+  ],
+  "mark": {
+    "type": "bar",
+    "stroke": "#ffffff",
+    "strokeWidth": 0.5
+  },
+  "encoding": {
+    "x": {
+      "field": "state",
+      "type": "nominal",
+      "title": "State / Territory",
+      "axis": {
+        "labelAngle": -45,
+        "labelColor": "#000000",
+        "titleColor": "#000000"
+      }
+    },
+    "y": {
+      "field": "Production_Thousands",
+      "aggregate": "sum",
+      "type": "quantitative",
+      "stack": "normalize",
+      "title": "Percentage of Total Production",
+      "axis": {
+        "format": ".0%",
+        "grid": false,
+        "domain": false,
+        "labelColor": "#000000",
+        "titleColor": "#000000"
+      }
+    },
+    "color": {
+      "field": "Crop_Category",
+      "type": "nominal",
+      "legend": {
+        "title": ["Crop Category", "(Click to Filter)"]
+      },
+      "scale": {
+        "domain": ["Paddy", "Fruits", "Vegetables", "Industrial crops", "Coconut", "Cash crops", "Spices", "Herbs"],
+        "range": ["#2e7d32", "#0277bd", "#81c784", "#fbc02d", "#8d6e63", "#4dd0e1", "#f57f17", "#512da8"]
+      }
+    },
+    "opacity": {
+      "condition": {
+        "param": "Crop_Selection",
+        "value": 1
+      },
+      "value": 0.15
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State / Territory"},
+      {"field": "Crop_Category", "type": "nominal", "title": "Crop Category"},
+      {"field": "Production_Thousands", "aggregate": "sum", "type": "quantitative", "title": "Volume (Thousands of Metric Tons)", "format": ",.0f"}
+    ]
+  },
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    }
+  }
+}
